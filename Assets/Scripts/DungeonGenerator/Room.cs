@@ -43,7 +43,6 @@ public class Room
     public Room[] BSP()
     {
         var l = new BSP.Leaf(this);
-        l.CreateBSP();
         return l.GetRooms();
     }
 
