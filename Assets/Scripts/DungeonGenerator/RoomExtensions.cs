@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using UnityEngine;
+using System.Linq;
 
 public static class RoomExtensions
 {
@@ -63,6 +64,91 @@ public static class RoomExtensions
             newRooms.AddRange(rooms[i].Floors());
         }
         return newRooms.ToArray();
+    }
+
+    public static Room[] Resize(this Room[] rooms, int addWidth, int addHeight, int addLength)
+    {
+        for (int i = 0; i < rooms.Length; i++)
+        {
+            rooms[i].Resize(addWidth, addHeight, addLength);
+        }
+        return rooms;
+    }
+
+    public static Room[] ShiftSize(this Room[] rooms, int shiftWidth, int shiftHeight, int shiftLength)
+    {
+        for (int i = 0; i < rooms.Length; i++)
+        {
+            rooms[i].ShiftSize(shiftWidth, shiftHeight, shiftLength);
+        }
+        return rooms;
+    }
+
+    public static Room[] ShiftSize(this Room[] rooms, Func<int> shiftWidth, Func<int> shiftHeight, Func<int> shiftLength)
+    {
+        for (int i = 0; i < rooms.Length; i++)
+        {
+            rooms[i].ShiftSize(shiftWidth(), shiftHeight(), shiftLength());
+        }
+        return rooms;
+    }
+
+    private static List<Room> Connect(this Room left, Room right)
+    {
+        var halls = new List<Room>();
+        Vector3Int point1 = left.Center;
+        Vector3Int point2 = right.Center;
+        Vector3Int delta = point2 - point1;
+        for (int i = 0; i < Mathf.Abs(delta.x) + 1; i++)
+        {
+            halls.Add(new Room(new Vector3Int(point1.x + i * System.Math.Sign(delta.x), point1.y, point1.z), new Vector3Int(1,1,1)));
+        }
+        for (int i = 0; i < Mathf.Abs(delta.z); i++)
+        {
+            halls.Add(new Room(new Vector3Int(point2.x, point2.y, point2.z - i * System.Math.Sign(delta.z)), new Vector3Int(1, 1, 1)));
+        }
+        return halls;
+    }
+
+    public static Room[] GetHalls(this Room[] rooms)
+    {
+        List<Room> remaining = rooms.ToList();
+        List<Room> connected = new List<Room>();
+        foreach (var item in remaining)
+        {
+            item.metaData.Add(new List<Room>());
+        }
+        connected.Add(remaining[remaining.Count - 1]);
+        remaining.RemoveAt(remaining.Count - 1);
+        for (int i = 0; i < connected.Count && remaining.Count > 0; i++)
+        {
+            var min = float.MaxValue;
+            int index = 0;
+            for (int j = 0; j < remaining.Count; j++)
+            {
+                var delta = (remaining[j].Center - connected[i].Center).magnitude;
+                if (delta < min)
+                {
+                    min = delta;
+                    index = j;
+                }
+            }
+            var meta = connected[i].metaData.Get<List<Room>>();
+            meta.Add(remaining[index]);
+            connected.Add(remaining[index]);
+            remaining.RemoveAt(index);
+        }
+        List<Room> halls = new List<Room>();
+        foreach (var item in connected)
+        {
+            var connectedWith = item.metaData.Get<List<Room>>();
+            foreach (var connectedTo in connectedWith)
+            {
+                var connection = item.Connect(connectedTo);
+                halls.AddRange(connection);
+            }
+        }
+        return halls.ToArray();
     }
 
     private static RectRoom[] Move(RectRoom[] rects)
@@ -128,6 +214,32 @@ public static class RoomExtensions
         {
             rooms[i].metaData.Remove<T>();
         }
+    }
+
+    public static void Resize(this Room room, int addWidth, int addHeight, int addLength)
+    {
+        room.width += addWidth;
+        room.height += addHeight;
+        room.length += addLength;
+        room.x -= addWidth / 2;
+        room.y -= addHeight / 2;
+        room.z -= addLength / 2;
+        Mathf.Clamp(room.width, 0, float.MaxValue);
+        Mathf.Clamp(room.height, 0, float.MaxValue);
+        Mathf.Clamp(room.length, 0, float.MaxValue);
+    }
+
+    public static void ShiftSize(this Room room, int shiftWidth, int shiftHeight, int shiftLength)
+    {
+        room.width -= Math.Abs(shiftWidth);
+        room.height -= Math.Abs(shiftHeight);
+        room.length -= Math.Abs(shiftLength);
+        if (shiftWidth > 0)
+            room.x += shiftWidth;
+        if (shiftHeight > 0)
+            room.y += shiftHeight;
+        if (shiftLength > 0)
+            room.z += shiftLength;
     }
 
     private static void AddDelta(this RectRoom[] rects)
