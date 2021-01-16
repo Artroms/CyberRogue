@@ -23,8 +23,8 @@ MonoBehaviour:
     m_Value: 2
     min: 0
   scatter:
-    m_OverrideState: 1
-    m_Value: 0.3
+    m_OverrideState: 0
+    m_Value: 0.53
     min: 0
     max: 1
   clamp:
@@ -50,7 +50,7 @@ MonoBehaviour:
     m_Value: {fileID: 10300, guid: 0000000000000000f000000000000000, type: 0}
   dirtIntensity:
     m_OverrideState: 0
-    m_Value: 5.44
+    m_Value: 0.39
     min: 0
 --- !u!114 &-7011558710299706105
 MonoBehaviour:
@@ -82,11 +82,11 @@ MonoBehaviour:
     max: 1
   smoothness:
     m_OverrideState: 1
-    m_Value: 0.544
+    m_Value: 0.136
     min: 0.01
     max: 1
   rounded:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: 0
 --- !u!114 &-5024229660672169415
 MonoBehaviour:

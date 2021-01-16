@@ -7,8 +7,8 @@ using System.Linq;
 public static class RoomExtensions
 {
 
-    private static int timeout = 100000;
-    private static float stepSize = 1;
+    private const int timeout = 1000;
+    private const float stepSize = 1;
 
     public static Room[] MoveRooms(this Room[] rooms)
     {
@@ -136,7 +136,7 @@ public static class RoomExtensions
             var meta = connected[i].metaData.Get<List<Room>>();
             meta.Add(remaining[index]);
             connected.Add(remaining[index]);
-            remaining.RemoveAt(index);
+            if(UnityEngine.Random.value > 0.5f) remaining.RemoveAt(index);
         }
         List<Room> halls = new List<Room>();
         foreach (var item in connected)

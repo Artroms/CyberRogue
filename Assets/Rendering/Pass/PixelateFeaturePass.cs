@@ -48,33 +48,28 @@ namespace UnityEngine.Experimental.Rendering.Universal
             int pixelWidth = (int)(camera.pixelWidth / pixelDensity);
             int pixelHeight = (int)(camera.pixelHeight / pixelDensity);
             CommandBuffer cmd = CommandBufferPool.Get("BasicFeature");
-            using (new ProfilingScope(cmd, m_ProfilingSampler))
-            {
+
+            cmd.GetTemporaryRT(pixelTexID, pixelWidth, pixelHeight, 0, FilterMode.Point);
+            cmd.GetTemporaryRT(pixelDepthID, pixelWidth, pixelHeight, 24, FilterMode.Point, RenderTextureFormat.Depth);
+            cmd.SetRenderTarget(pixelTexID, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store,
+                                pixelDepthID, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
+
+            cmd.ClearRenderTarget(true, true, Color.clear);
 
 
-                cmd.GetTemporaryRT(pixelTexID, pixelWidth, pixelHeight, 0, FilterMode.Point);
-                cmd.GetTemporaryRT(pixelDepthID, pixelWidth, pixelHeight, 24, FilterMode.Point, RenderTextureFormat.Depth);
-                cmd.SetRenderTarget(pixelTexID, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store,
-                                    pixelDepthID, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
+            context.ExecuteCommandBuffer(cmd);
+            cmd.Clear();
 
-                cmd.ClearRenderTarget(true, true, Color.clear);
+            context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref m_FilteringSettings, ref m_RenderStateBlock);
+            cmd.SetRenderTarget(cameraID, RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
 
+            cmd.Blit(new RenderTargetIdentifier(pixelTexID), BuiltinRenderTextureType.CurrentActive, blitMat);
 
-                context.ExecuteCommandBuffer(cmd);
-                cmd.Clear();
+            cmd.ReleaseTemporaryRT(pixelTexID);
+            cmd.ReleaseTemporaryRT(pixelDepthID);
 
-                context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref m_FilteringSettings, ref m_RenderStateBlock);
-                cmd.SetRenderTarget(cameraID, RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
-
-                cmd.Blit(new RenderTargetIdentifier(pixelTexID), BuiltinRenderTextureType.CurrentActive, blitMat);
-
-                cmd.ReleaseTemporaryRT(pixelTexID);
-                cmd.ReleaseTemporaryRT(pixelDepthID);
-
-                context.ExecuteCommandBuffer(cmd);
-                cmd.Clear();
-
-            }
+            context.ExecuteCommandBuffer(cmd);
+            cmd.Clear();
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
         }

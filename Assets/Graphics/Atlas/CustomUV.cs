@@ -14,7 +14,6 @@ public class CustomUV : MonoBehaviour, ISerializationCallbackReceiver
     public int y;
     // Start is called before the first frame update
 
-#if UNITY_EDITOR
     // Update is called once per frame
     [ExecuteInEditMode, ContextMenu("OnValidate")]
     void OnValidate()
@@ -87,8 +86,6 @@ public class CustomUV : MonoBehaviour, ISerializationCallbackReceiver
     {
         Quad = serialQuad;
     }
-
-#endif
 
     private struct UV
     {
