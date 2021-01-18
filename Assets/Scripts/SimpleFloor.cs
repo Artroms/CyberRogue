@@ -26,8 +26,7 @@ public class SimpleFloor : MonoBehaviour
         rooms = new Room[rooms.Length];
         for (int i = 0; i < rooms.Length; i++)
         {
-            rooms[i] = new Room(1000,1,1000);
-            rooms[i].height = 1;
+            rooms[i] = new Room(Random.Range(5,15),Random.Range(3,30),Random.Range(5,15));
         }
         BSP.Leaf.maxSize = 15;
         BSP.Leaf.minSize = 7;
@@ -43,7 +42,9 @@ public class SimpleFloor : MonoBehaviour
         Stopwatch sw = new Stopwatch();
         sw.Start();
         System.Func<int> shift = () => Random.Range(-2, 2);
-        rooms = rooms.MoveRooms(5).Floors().BSP().Resize(-2,0,-2).ShiftSize(shift, () => 0, shift);
+        //rooms = rooms.MoveRooms(5).Floors().BSP().Resize(-2,0,-2).ShiftSize(shift, () => 0, shift);
+	rooms = rooms.MoveRooms(5).Floors();
+	/*
         var connection = rooms.GetHalls();
         var all = new Room[rooms.Length + connection.Length];
         for (int i = 0; i < rooms.Length; i++)
@@ -55,6 +56,7 @@ public class SimpleFloor : MonoBehaviour
             all[i + rooms.Length] = connection[i];
         }
         rooms = all;
+	*/
         sw.Stop();
         UnityEngine.Debug.Log("MoveRooms().Floors().BSP() miliseconds elapsed: " + sw.ElapsedMilliseconds);
         /*
