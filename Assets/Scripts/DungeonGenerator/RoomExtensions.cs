@@ -93,20 +93,44 @@ public static class RoomExtensions
         return rooms;
     }
 
+    public static Vector3Int Min(this Room[] rooms)
+    {
+        Vector3Int min = Vector3Int.one * int.MaxValue;
+        for (int i = 0; i < rooms.Length; i++)
+        {
+            min.x = rooms[i].x < min.x ? rooms[i].x : min.x;
+            min.y = rooms[i].y < min.y ? rooms[i].y : min.y;
+            min.z = rooms[i].z < min.z ? rooms[i].z : min.z;
+        }
+        return min;
+    }
+
+    public static Vector3Int Max(this Room[] rooms)
+    {
+        Vector3Int max = Vector3Int.one * int.MinValue;
+        for (int i = 0; i < rooms.Length; i++)
+        {
+            max.x = rooms[i].x + rooms[i].width > max.x ? rooms[i].x + rooms[i].width : max.x;
+            max.y = rooms[i].y + rooms[i].height > max.y ? rooms[i].y + rooms[i].height : max.y;
+            max.z = rooms[i].z + rooms[i].length > max.z ? rooms[i].z + rooms[i].length : max.z;
+        }
+        return max;
+    }
+
     private static List<Room> Connect(this Room left, Room right)
     {
         var halls = new List<Room>();
         Vector3Int point1 = left.Center;
         Vector3Int point2 = right.Center;
         Vector3Int delta = point2 - point1;
-        for (int i = 0; i < Mathf.Abs(delta.x) + 1; i++)
-        {
-            halls.Add(new Room(new Vector3Int(point1.x + i * System.Math.Sign(delta.x), point1.y, point1.z), new Vector3Int(1,1,1)));
-        }
-        for (int i = 0; i < Mathf.Abs(delta.z); i++)
-        {
-            halls.Add(new Room(new Vector3Int(point2.x, point2.y, point2.z - i * System.Math.Sign(delta.z)), new Vector3Int(1, 1, 1)));
-        }
+        if(delta.x > 0)
+            halls.Add(new Room(new Vector3Int(point1.x, point1.y, point1.z), new Vector3Int(delta.x + 1, 1, 1)));
+        else
+            halls.Add(new Room(new Vector3Int(point1.x + delta.x, point1.y, point1.z), new Vector3Int(-delta.x + 1, 1, 1)));
+        if(delta.z > 0)
+            halls.Add(new Room(new Vector3Int(point2.x, point2.y, point2.z - delta.z), new Vector3Int(1, 1, delta.z + 1)));
+        else
+            halls.Add(new Room(new Vector3Int(point2.x, point2.y, point2.z), new Vector3Int(1, 1, -delta.z + 1)));
         return halls;
     }
 

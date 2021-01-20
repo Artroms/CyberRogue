@@ -142,19 +142,16 @@ struct Varyings
         half clusters = 8;
         
         color.xyz = RgbToHsv(color.xyz);
-        color.yz = round(color.yz * clusters) / clusters;
+        color.yz = round(color.yz * clusters);
         
         half4 texelSize = _BaseMap_TexelSize;
         half centerU = floor(input.uv.x * texelSize.z) / texelSize.z;
         half centerV = ceil(input.uv.y * texelSize.w) / texelSize.w;
         half uDither = fmod(centerU, texelSize.x * 2) * texelSize.z;
         half vDither = fmod(centerV, texelSize.y * 2) * texelSize.w;
-        half Dither = min(uDither, vDither);
-        Dither = saturate(Dither);
-        half ValDith = 1 - fmod(round(color.z * clusters), 2);
-        half dith = Dither * (ValDith);
-        color.z = round((color.z + dith / clusters) * clusters) / clusters;
-        
+        half Dither = round(min(uDither, vDither) * (1 - fmod(color.z, 2)));
+        color.z = (color.z + Dither);
+        color.yz /= clusters;
         color.xyz = HsvToRgb(color);
         color.rgb = MixFog(color.rgb, inputData.fogCoord);
         return color;
