@@ -7,8 +7,8 @@ public class MetaData
 
     public void Add<T>(T meta)
     {
-        data.Remove(typeof(T));
-        data.Add(typeof(T), meta);
+        if (!data.ContainsKey(typeof(T)))
+            data.Add(typeof(T), meta);
     }
 
     public T Get<T>()

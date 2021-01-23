@@ -10,4 +10,9 @@ public class RoomOption
         NotAffected
     };
 
+    public class Doors
+    {
+        public HashSet<Vector3Int> list = new HashSet<Vector3Int>();
+    }
+
 }

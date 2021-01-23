@@ -120,17 +120,37 @@ public static class RoomExtensions
     private static List<Room> Connect(this Room left, Room right)
     {
         var halls = new List<Room>();
+        if(left.width > left.length)
+        {
+            var tmp = left;
+            left = right;
+            right = tmp;
+        }
+        else if(right.length > right.width)
+        {
+            var tmp = left;
+            left = right;
+            right = tmp;
+        }
         Vector3Int point1 = left.Center;
         Vector3Int point2 = right.Center;
         Vector3Int delta = point2 - point1;
-        if(delta.x > 0)
+        if (delta.x > 0)
+        {
             halls.Add(new Room(new Vector3Int(point1.x, point1.y, point1.z), new Vector3Int(delta.x + 1, 1, 1)));
+        }
         else
+        {
             halls.Add(new Room(new Vector3Int(point1.x + delta.x, point1.y, point1.z), new Vector3Int(-delta.x + 1, 1, 1)));
-        if(delta.z > 0)
+        }
+        if (delta.z > 0)
+        {
             halls.Add(new Room(new Vector3Int(point2.x, point2.y, point2.z - delta.z), new Vector3Int(1, 1, delta.z + 1)));
+        }
         else
+        {
             halls.Add(new Room(new Vector3Int(point2.x, point2.y, point2.z), new Vector3Int(1, 1, -delta.z + 1)));
+        }
         return halls;
     }
 
@@ -168,11 +188,65 @@ public static class RoomExtensions
             var connectedWith = item.metaData.Get<List<Room>>();
             foreach (var connectedTo in connectedWith)
             {
-                var connection = item.Connect(connectedTo);
-                halls.AddRange(connection);
+                halls.AddRange(item.Connect(connectedTo));
             }
         }
+        AddDoors();
+        connected.ToArray().RemoveMetaData<List<Room>>();
         return halls.ToArray();
+
+        void AddDoors()
+        {
+            Vector3Int min = rooms.Min();
+            Vector3Int max = rooms.Max();
+            Vector3Int size = max - min;
+            bool[,,] matrix = new bool[size.x + 1, size.y + 1, size.z + 1];
+            for (int j = 0; j < size.x; j++)
+            {
+                for (int k = 0; k < size.y; k++)
+                {
+                    for (int l = 0; l < size.z; l++)
+                    {
+                        matrix[j, k, l] = false;
+                    }
+                }
+            }
+            for (int i = 0; i < halls.Count; i++)
+            {
+                for (int j = 0; j < halls[i].width; j++)
+                {
+                    for (int k = 0; k < halls[i].height; k++)
+                    {
+                        for (int l = 0; l < halls[i].length; l++)
+                        {
+                            Vector3Int pos = new Vector3Int(halls[i].x + j - min.x, halls[i].y + k - min.y, halls[i].z + l - min.z);
+                            matrix[pos.x, pos.y, pos.z] = true;
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < rooms.Length; i++)
+            {
+                rooms[i].metaData.Add(new RoomOption.Doors());
+                for (int j = 0; j < rooms[i].width; j++)
+                {
+                    for (int k = 0; k < rooms[i].height; k++)
+                    {
+                        for (int l = 0; l < rooms[i].length; l++)
+                        {
+                            if (j == 0 || j == rooms[i].width - 1 || l == 0 || l == rooms[i].length - 1)
+                            {
+                                Vector3Int pos = new Vector3Int(rooms[i].x + j - min.x, rooms[i].y + k - min.y, rooms[i].z + l - min.z);
+                                if (matrix[pos.x, pos.y, pos.z] == true)
+                                {
+                                    rooms[i].metaData.Get<RoomOption.Doors>().list.Add(new Vector3Int(j, k + 10, l));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private static RectRoom[] Move(RectRoom[] rects)

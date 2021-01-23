@@ -1,8 +1,9 @@
 #ifndef UNIVERSAL_FORWARD_LIT_PASS_INCLUDED
 #define UNIVERSAL_FORWARD_LIT_PASS_INCLUDED
 
-#include "ClusteredLighting.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "TexelFunctions.hlsl"
+#include "FastColorSpace.hlsl"
 
 struct Attributes
 {
@@ -49,6 +50,7 @@ struct Varyings
 
 #if defined(REQUIRES_WORLD_SPACE_POS_INTERPOLATOR)
     inputData.positionWS = CalculateSnappedWorldPos(input.uv, input.positionWS, _BaseMap_TexelSize);
+    //inputData.positionWS = input.positionWS;
 #endif
 
 #ifdef _NORMALMAP
@@ -124,37 +126,46 @@ struct Varyings
 
         return output;
     }
+    
+half3 ClusterAndDithering(in half3 color, in half2 uv)
+{
+    half2 clusters = half2(8,8);
+        
+    color.xyz = RGBtoHSV(color.xyz);
+    color.yz = round(color.yz * clusters);
+    
+    half2 centerUV = half2(0, 0);
+    centerUV.x = floor(uv.x * _BaseMap_TexelSize.z);
+    centerUV.y = ceil(uv.y * _BaseMap_TexelSize.w);
+    centerUV = fmod(centerUV, 2);
+    half Min = min(centerUV.x, centerUV.y);
+    half Odd = 1 - fmod(color.z, 2);
+    half Val = color.z > clusters.y / 2 ? 0 : 1;
+    half Dither = Min * Odd * Val;
+    color.z = (color.z + Dither);
+    color.yz /= clusters;
+    color = HSVtoRGB(color);
+    return color;
+}
+
 
 // Used in Standard (Physically Based) shader
-    half4 LitPassFragment(Varyings input) : SV_Target
-    {
-        UNITY_SETUP_INSTANCE_ID(input);
-        UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+half4 LitPassFragment(Varyings input) : SV_Target
+{
+    UNITY_SETUP_INSTANCE_ID(input);
+    UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
 
-        SurfaceData surfaceData;
-        InitializeStandardLitSurfaceData(input.uv, surfaceData);
+    SurfaceData surfaceData;
+    InitializeStandardLitSurfaceData(input.uv, surfaceData);
 
-        InputData inputData;
-        InitializeInputData(input, surfaceData.normalTS, inputData);
+    InputData inputData;
+    InitializeInputData(input, surfaceData.normalTS, inputData);
 
-        half4 color = UniversalFragmentPBR(inputData, surfaceData.albedo, surfaceData.metallic, surfaceData.specular, surfaceData.smoothness, surfaceData.occlusion, surfaceData.emission, surfaceData.alpha);
-    
-        half clusters = 8;
-        
-        color.xyz = RgbToHsv(color.xyz);
-        color.yz = round(color.yz * clusters);
-        
-        half4 texelSize = _BaseMap_TexelSize;
-        half centerU = floor(input.uv.x * texelSize.z) / texelSize.z;
-        half centerV = ceil(input.uv.y * texelSize.w) / texelSize.w;
-        half uDither = fmod(centerU, texelSize.x * 2) * texelSize.z;
-        half vDither = fmod(centerV, texelSize.y * 2) * texelSize.w;
-        half Dither = round(min(uDither, vDither) * (1 - fmod(color.z, 2)));
-        color.z = (color.z + Dither);
-        color.yz /= clusters;
-        color.xyz = HsvToRgb(color);
-        color.rgb = MixFog(color.rgb, inputData.fogCoord);
-        return color;
-    }
+    half4 color = UniversalFragmentPBR(inputData, surfaceData.albedo, surfaceData.metallic, surfaceData.specular, surfaceData.smoothness, surfaceData.occlusion, surfaceData.emission, surfaceData.alpha);
+    color.rgb = ClusterAndDithering(color.rgb, input.uv);
+    color.rgb = MixFog(color.rgb, inputData.fogCoord);
+    return color;
+}
+
 
 #endif

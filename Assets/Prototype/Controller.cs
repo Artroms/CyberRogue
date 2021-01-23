@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Controller : MonoBehaviour
 {
-    private CharacterController rigidbody;
+    private CharacterController controller;
     private Animator animator;
 
     [SerializeField, Range(1, 40)]
@@ -24,7 +24,7 @@ public class Controller : MonoBehaviour
 
     void Start()
     {
-        rigidbody = GetComponent<CharacterController>();
+        controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
     }
 
@@ -43,7 +43,7 @@ public class Controller : MonoBehaviour
     {
         Vector3 moveDirection = new Vector3(direction.x, 0, direction.y) * forwardSpeed;
         prevDirection = Vector3.Lerp(prevDirection, moveDirection, acceleration * Time.deltaTime);
-        rigidbody.SimpleMove(prevDirection);
+        controller.SimpleMove(prevDirection);
         animator.SetFloat("Speed", prevDirection.magnitude / forwardSpeed);
     }
 

@@ -2,7 +2,7 @@ float3 CalculateSnappedWorldPos(float2 originalUV, float3 originalWorldPos, floa
 {
     // 1.) Calculate how much the texture UV coords need to
     //     shift to be at the center of the nearest texel.
-    float2 centerUV = floor(originalUV * (texelSize.zw))/texelSize.zw + (texelSize.xy/2.0);
+    float2 centerUV = (floor(originalUV * (texelSize.zw)) + 0.5) / texelSize.zw;
     float2 dUV = (centerUV - originalUV);
  
     // 2b.) Calculate how much the texture coords vary over fragment space.
@@ -13,7 +13,8 @@ float3 CalculateSnappedWorldPos(float2 originalUV, float3 originalWorldPos, floa
     float2 dUVdT = ddy(originalUV);
  
     // 2c.) Invert the fragment from texture matrix
-    float2x2 dSTdUV = float2x2(dUVdT[1], -dUVdT[0], -dUVdS[1], dUVdS[0])*(1.0f/(dUVdS[0]*dUVdT[1]-dUVdT[0]*dUVdS[1]));
+    float2x2 dSTdUV = float2x2(dUVdT[1], -dUVdT[0],
+                              -dUVdS[1], dUVdS[0])*(1.0f/(dUVdS[0]*dUVdT[1]-dUVdT[0]*dUVdS[1]));
  
  
     // 2d.) Convert the UV delta to a fragment space delta

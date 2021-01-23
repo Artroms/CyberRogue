@@ -666,7 +666,7 @@ MonoBehaviour:
       slotIndex: 0
   m_OutputFlowSlot:
   - link: []
-  blendMode: 2
+  blendMode: 1
   useAlphaClipping: 0
   generateMotionVector: 0
   m_SubOutputs:
@@ -1792,7 +1792,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: UnityEngine.Gradient, UnityEngine.CoreModule, Version=0.0.0.0,
           Culture=neutral, PublicKeyToken=null
-      m_SerializableObject: '{"colorKeys":[{"color":{"r":0.0,"g":0.0,"b":0.0,"a":1.0},"time":0.11470206826925278},{"color":{"r":0.0,"g":0.0,"b":0.0,"a":1.0},"time":0.502937376499176},{"color":{"r":0.0,"g":0.7490196228027344,"b":0.007843137718737126,"a":1.0},"time":0.6882429122924805}],"alphaKeys":[{"alpha":0.0,"time":0.0},{"alpha":0.24313725531101228,"time":0.09117265790700913},{"alpha":0.6392157077789307,"time":0.20000000298023225},{"alpha":0.6392157077789307,"time":0.39118027687072756},{"alpha":0.5843137502670288,"time":0.6411840915679932},{"alpha":0.0,"time":0.7941252589225769}],"gradientMode":0}'
+      m_SerializableObject: '{"colorKeys":[{"color":{"r":0.0,"g":0.0,"b":0.0,"a":1.0},"time":0.11470206826925278},{"color":{"r":0.0,"g":0.0,"b":0.0,"a":1.0},"time":0.502937376499176},{"color":{"r":0.0,"g":1.4980392456054688,"b":0.01568627543747425,"a":1.0},"time":0.6882429122924805}],"alphaKeys":[{"alpha":0.0,"time":0.0},{"alpha":0.24313725531101228,"time":0.09117265790700913},{"alpha":0.6392157077789307,"time":0.20000000298023225},{"alpha":0.6392157077789307,"time":0.39118027687072756},{"alpha":0.5843137502670288,"time":0.6411840915679932},{"alpha":0.0,"time":0.7941252589225769}],"gradientMode":0}'
     m_Space: 2147483647
   m_Property:
     name: Color

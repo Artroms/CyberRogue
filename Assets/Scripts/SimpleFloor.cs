@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Diagnostics;
+using System.Linq;
 using BSP;
 
 public class SimpleFloor : MonoBehaviour
@@ -72,24 +73,22 @@ public class SimpleFloor : MonoBehaviour
                 }
             }
         }
-        var connection = rooms.GetHalls();
-        var tmp = rooms;
-        rooms = connection;
+        var halls = rooms.GetHalls();
+        var doors = new List<Room>();
         for (int i = 0; i < rooms.Length; i++)
         {
-            for (int j = 0; j < rooms[i].width; j++)
+            var roomsDoors = rooms[i].metaData.Get<RoomOption.Doors>().list;
+            foreach (var item in roomsDoors)
             {
-                for (int k = 0; k < rooms[i].height; k++)
-                {
-                    for (int l = 0; l < rooms[i].length; l++)
-                    {
-                        Vector3Int pos = new Vector3Int(rooms[i].x + j - min.x, rooms[i].y + k - min.y, rooms[i].z + l - min.z);
-                        matrix[pos.x, pos.y, pos.z] = true;
-                    }
-                }
+                Vector3Int pos = new Vector3Int(rooms[i].x + item.x, rooms[i].y + item.y, rooms[i].z + item.z);
+                doors.Add(new Room(pos, new Vector3Int(1, 1, 1)));
             }
         }
-        List<Room> Walls = new List<Room>();
+        var all = new List<Room>();
+        all.AddRange(halls);
+        all.AddRange(doors);
+        all.AddRange(rooms);
+        rooms = all.ToArray();
 
         /*
         GameObject g = new GameObject();
@@ -121,7 +120,7 @@ public class SimpleFloor : MonoBehaviour
             }
         }
         */
-
+        /*
         for (int j = 0; j < size.x; j++)
         {
             for (int k = 0; k < size.y; k++)
@@ -135,7 +134,7 @@ public class SimpleFloor : MonoBehaviour
                 }
             }
         }
-        rooms = Walls.ToArray();
+        */
 
         sw.Stop();
         UnityEngine.Debug.Log("MoveRooms().Floors().BSP() miliseconds elapsed: " + sw.ElapsedMilliseconds);
