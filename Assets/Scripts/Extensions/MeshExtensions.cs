@@ -24,7 +24,7 @@ namespace Exstensions
             bytes += mesh.colors.Length * 4;
             newmesh.tangents = mesh.tangents;
             bytes += mesh.tangents.Length * 4 * 4;
-            Debug.Log(bytes);
+            Debug.Log(bytes.ToString() + " bytes allocated");
             return newmesh;
         }
     }
